@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
 """
-版本：0.0.2
+版本：0.0.3
 目前只会爬取http/https
 网页最大查询为10,000条
 """
@@ -21,8 +22,6 @@ class safeSearch:
         # 还有两个参数未使用一个是
         self.data = {
             "latest": 'true',
-            # 'start_time':"2015-08-07 16:00:00",
-            # "end_time": "2022-09-30 15:59:59",
             "ignore_cache": 'false',
             "shortcuts": ["635fcb52cc57190bd8826d09", "635fcbaacc57190bd8826d0b", "63734bfa9c27d4249ca7261c"],
             "query": searKey,
@@ -37,10 +36,9 @@ class safeSearch:
                 "browser_info": "Chrome（版本: 115.0.0.0&nbsp;&nbsp;内核: Blink）",
                 "fingerprint": "50a2217e",
                 "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.1901.203",
-                "date": "2023/8/21 14:36:44",
+                "date": f"{datetime.now().strftime('%Y/%m/%d %H:%M:%S')}",
                 "UUID": "da8f0570-47c6-5d6c-b8a3-a60b8084c937"
             },
-            "a34lrc0gjl9": "="
         }
         self.api = 'https://quake.360.net/api/search/query_string/quake_service'
         self.hearders = {
@@ -70,22 +68,25 @@ class safeSearch:
 
     def writeDataFile(self, data):
         """
-        将数据写入文件中
+        将数据写入文件中，接受的值为返回的所有的数据
         :param data:
         :return:
         """
-        with open(f'{fileName}.txt', 'a+', encoding='utf8') as f:
-            f.write(data + "\n")
+        for dataTemp in data['data']:
+            protocol = "https" if "ssl" in dataTemp['service']['name'] else "http"
+            with open(f'../result/{fileName}.txt', 'a+', encoding='utf8') as f:
+                f.write(f"{protocol}://{dataTemp['ip']}:{dataTemp['port']}\n")
 
     def getTotalNum(self):
         """
         获取数据总量
         :return: 返回数据总量
         """
+        self.hearders['Cookie'] = self.readCookie()
         resp = self.requests.post(url=self.api, headers=self.hearders, json=self.data)
         return resp.json()['meta']['pagination']['total']
 
-    def getSearchData(self, start):
+    def getSearchData(self, start=0):
         """
         获取数据
         :param start:
@@ -93,29 +94,37 @@ class safeSearch:
         """
         self.data['start'] = start
         resp = self.requests.post(url=self.api, headers=self.hearders, json=self.data)
-        allData = resp.json()
-        return allData['data']
+        return resp.json()
 
-    def calculate_months_before(self, start_time_str):
+    def getStartDate(self, start_time_str):
         start_time_str = datetime.strptime(start_time_str, '%Y-%m-%d')
         # 计算三个月的时间间隔
         three_months = timedelta(days=60)  # 假设每月30天
-
         # 计算之前三个月的时间
         before_time = start_time_str - three_months
-        return before_time
+        return before_time.strftime('%Y-%m-%d')
 
     def run(self):
-        self.hearders['Cookie'] = self.readCookie()
-        total = self.getTotalNum()
-        print(f"共查到数据：{total}条\n每次爬{self.data['size']}条\n准备开始爬取······")
-        if total >= 10000:
-            total = 10000
-        for _ in tqdm(range(0, total, self.data['size'])):
-            for dataTemp in self.getSearchData(_):
-                protocol = "https" if "ssl" in dataTemp['service']['name'] else "http"
-                self.writeDataFile(f"{protocol}://{dataTemp['ip']}:{dataTemp['port']}")
-            time.sleep(0.5)
+        allTotal = self.getTotalNum()
+        print(f"共查到数据：{allTotal}条\n每次爬{self.data['size']}条\n准备开始爬取······")
+        if allTotal > 10:
+            data = datetime.now().strftime("%Y-%m-%d")
+            # 开始时间是当前日期的前2两个月并且开启时间是 16:00:00
+            self.data['start_time'] = data + ' 16:00:00'
+            while tqdm(allTotal != 0):
+                # 结束时间为上一次的结束时间
+                self.data['end_time'] = self.data['start_time'].split(' ')[0] + " 15:59:59"
+                # 开始时间为上一次开始时间的前2个月的时间
+                self.data['start_time'] = self.getStartDate(self.data['start_time'].split(' ')[0]) + ' 16:00:00'
+                data = self.getSearchData()
+                self.writeDataFile(data)
+                allTotal -= data['meta']['pagination']['total']
+
+
+        else:
+            for _ in tqdm(range(0, allTotal, self.data['size'])):
+                self.writeDataFile(self.getSearchData(_))
+                time.sleep(0.5)
 
 
 if __name__ == '__main__':
