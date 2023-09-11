@@ -107,7 +107,7 @@ class safeSearch:
     def run(self):
         allTotal = self.getTotalNum()
         print(f"共查到数据：{allTotal}条\n每次爬{self.data['size']}条\n准备开始爬取······")
-        if allTotal > 10:
+        if allTotal > 100:
             data = datetime.now().strftime("%Y-%m-%d")
             # 开始时间是当前日期的前2两个月并且开启时间是 16:00:00
             self.data['start_time'] = data + ' 16:00:00'
@@ -129,8 +129,8 @@ class safeSearch:
 
 if __name__ == '__main__':
     defaultSearchKey = ' AND service: "http" AND is_domain:"false"'
-    # searKey = input('请输入查询语法：(默认去除cdn、蜜罐、无效请求)\n') + defaultSearchKey
-    searKey = 'city:"宝鸡" AND favicon: "e05b47d5ce11d2f4182a964255870b76"' + defaultSearchKey
+    searKey = input('请输入查询语法：(默认去除cdn、蜜罐、无效请求)\n') + defaultSearchKey
+    # searKey = 'city:"宝鸡" AND favicon: "e05b47d5ce11d2f4182a964255870b76"' + defaultSearchKey
     print(searKey)
     safe = safeSearch(searKey=searKey, size=100)
     safe.run()

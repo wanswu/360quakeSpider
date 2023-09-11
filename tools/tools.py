@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime, timedelta
 
-fileName = datetime.now().strftime("%Y-%m-%d_%H:%M")
+fileName = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
 
 def readCookie():
@@ -29,10 +29,18 @@ def writeDataFile(data):
     for dataTemp in data['data']:
         protocol = "https" if "ssl" in dataTemp['service']['name'] else "http"
         with open(f'./result/{fileName}.txt', 'a+', encoding='utf8') as f:
-            f.write(f"{protocol}://{dataTemp['ip']}:{dataTemp['port']}\n")
+            if dataTemp["domain"] is not None:
+                f.write(f"{protocol}://{dataTemp['domain']}:{dataTemp['port']}\n")
+            else:
+                f.write(f"{protocol}://{dataTemp['ip']}:{dataTemp['port']}\n")
 
 
 def getStartDate(start_time_str):
+    """
+    计算90天之前的时间，作为开始的时间
+    :param start_time_str:
+    :return:
+    """
     start_time_str = datetime.strptime(start_time_str, '%Y-%m-%d')
     # 计算三个月的时间间隔
     three_months = timedelta(days=60)  # 假设每月30天
