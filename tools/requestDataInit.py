@@ -4,17 +4,16 @@ from tqdm import tqdm
 from datetime import datetime
 import time
 
-from .tools import readCookie, writeDataFile, getStartDate
+from .fileOperate import readCookie, writeDataFile, getStartDate
 
 
 class requestInit:
     def __init__(self, searKey, size):
         """
         初始化变量
-        :param searKey:
-        :param size:
+        :param searKey:搜索的语法
+        :param size: 每页大小
         """
-        # 还有两个参数未使用一个是
         self.data = {
             "latest": 'true',
             "ignore_cache": 'false',
@@ -67,7 +66,7 @@ class requestInit:
     def run(self):
         allTotal = self.getTotalNum()
         print(f"共查到数据：{allTotal}条\n每次爬{self.data['size']}条\n准备开始爬取······")
-        if allTotal > 10:
+        if allTotal > 100:
             data = datetime.now().strftime("%Y-%m-%d")
             # 开始时间是当前日期的前2两个月并且开启时间是 16:00:00
             self.data['start_time'] = data + ' 16:00:00'

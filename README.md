@@ -4,6 +4,7 @@
 2. 支持自定义搜索语法
 3. 默认加入`AND service: "http" AND is_domain:"false"`语法
 4. 默认去除cdn、蜜罐、无效请求
+5. 突破网页1w条数据的限制
 
 使用方法：
 1. 浏览器打开开发者工具(F12)，找到cookie然后写入`config.ini`中
