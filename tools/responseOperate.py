@@ -15,5 +15,6 @@ def getStartDate(start_time_str):
     before_time = start_time_str - three_months
     return before_time.strftime('%Y-%m-%d')
 
+
 if __name__ == '__main__':
     print('test')

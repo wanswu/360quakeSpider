@@ -6,9 +6,15 @@
 4. 默认去除cdn、蜜罐、无效请求
 5. 突破网页1w条数据的限制
 
+TODO:
+1. 根据ip和域名列表查询对应资产
+2. 显示资产地图经纬度
+3. ……
+
 使用方法：
 1. 浏览器打开开发者工具(F12)，找到cookie然后写入`config.ini`中
-![img.png](doc/img.png)
+
+   ![img.png](doc/img.png)
 
 2. 终端运行
     ```shell 
