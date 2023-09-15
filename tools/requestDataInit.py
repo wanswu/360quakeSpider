@@ -4,7 +4,8 @@ from tqdm import tqdm
 from datetime import datetime
 import time
 
-from .fileOperate import readCookie, writeDataFile, getStartDate
+from .fileOperate import readCookie, writeDataFile
+from .responseOperate import getStartDate
 
 
 class requestInit:
@@ -66,13 +67,17 @@ class requestInit:
     def run(self):
         allTotal = self.getTotalNum()
         print(f"共查到数据：{allTotal}条\n每次爬{self.data['size']}条\n准备开始爬取······")
+        # 如果总页数超过100则说明总数据超过了1w那么就分批查询
         if allTotal > 100:
             data = datetime.now().strftime("%Y-%m-%d")
             # 开始时间是当前日期的前2两个月并且开启时间是 16:00:00
             self.data['start_time'] = data + ' 16:00:00'
             with tqdm(total=allTotal) as pbar:
+                # 循环爬取，每次向前推60天
                 while allTotal != 0:
+                    # 结束直接为上次的开始时间
                     self.data['end_time'] = self.data['start_time'].split(' ')[0] + " 15:59:59"
+                    # 获取前60天的时间
                     self.data['start_time'] = getStartDate(self.data['start_time'].split(' ')[0]) + ' 16:00:00'
                     data = self.getSearchData()
                     pageTotal = data['meta']['pagination']['total']
