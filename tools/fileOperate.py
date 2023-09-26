@@ -30,9 +30,13 @@ def writeDataFile(data):
         protocol = "https" if "ssl" in dataTemp['service']['name'] else "http"
         with open(f'./result/{fileName}.txt', 'a+', encoding='utf8') as f:
             if dataTemp.get('domain') is not None:
-                f.write(f"{protocol}://{dataTemp['domain']}:{dataTemp['port']}\n")
+                if dataTemp['domain'] == "":
+                    f.write(f"{protocol}://{dataTemp['ip']}:{dataTemp['port']}\n")
+                else:
+                    f.write(f"{protocol}://{dataTemp['domain']}:{dataTemp['port']}\n")
             else:
                 f.write(f"{protocol}://{dataTemp['ip']}:{dataTemp['port']}\n")
+
 
 
 if __name__ == '__main__':
