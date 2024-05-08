@@ -14,5 +14,5 @@ def calculate_months_before(start_time_str):
 
 start_time_str = datetime.now().strftime("%Y-%m-%d")
 before_time = calculate_months_before(start_time_str)
-
-print(f"开始时间：{start_time_str}\n结束时间：{before_time.strftime('%Y-%m-%d')}")
+if __name__ == '__main__':
+    print(f"开始时间：{start_time_str}\n结束时间：{before_time.strftime('%Y-%m-%d')}")

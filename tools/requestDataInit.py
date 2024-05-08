@@ -6,7 +6,7 @@ import time
 
 from .fileOperate import readCookie, writeDataFile
 from .responseOperate import getStartDate
-
+requests.packages.urllib3.disable_warnings()
 
 class requestInit:
     def __init__(self, searKey, size):
@@ -17,22 +17,20 @@ class requestInit:
         """
         self.data = {
             "latest": 'true',
-            "ignore_cache": 'false',
-            "shortcuts": ["635fcb52cc57190bd8826d09", "635fcbaacc57190bd8826d0b", "63734bfa9c27d4249ca7261c"],
-            "query": searKey,
+            "ignore_cache": 'true',
+            "shortcuts": [],
             "start": 0,
             "size": size,
             "device": {
                 "device_type": "PC",
-                "os": "Windows",
-                "os_version": "10.0",
+                "os": "Mac OS",
+                "os_version": "10.15.7",
                 "language": "zh_CN",
-                "network": "4g",
-                "browser_info": "Chrome（版本: 115.0.0.0&nbsp;&nbsp;内核: Blink）",
-                "fingerprint": "50a2217e",
-                "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.1901.203",
+                "network": "5g",
+                "browser_info": "Chrome（版本: 120.0.0.0&nbsp;&nbsp;内核: Blink）",
+                "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
                 "date": f"{datetime.now().strftime('%Y/%m/%d %H:%M:%S')}",
-                "UUID": "da8f0570-47c6-5d6c-b8a3-a60b8084c937"
+
             },
         }
         self.api = 'https://quake.360.net/api/search/query_string/quake_service'
@@ -51,7 +49,7 @@ class requestInit:
         :return: 返回数据总量
         """
         self.hearders['Cookie'] = readCookie()
-        resp = self.requests.post(url=self.api, headers=self.hearders, json=self.data)
+        resp = self.requests.post(url=self.api, headers=self.hearders, json=self.data,verify=False)
         return resp.json()['meta']['pagination']['total']
 
     def getSearchData(self, start=0):
@@ -62,17 +60,18 @@ class requestInit:
         """
         self.data['start'] = start
         resp = self.requests.post(url=self.api, headers=self.hearders, json=self.data)
+        self.requests.close()
         return resp.json()
 
     def run(self):
         allTotal = self.getTotalNum()
         print(f"共查到数据：{allTotal}条\n每次爬{self.data['size']}条\n准备开始爬取······")
-        # 如果总页数超过100则说明总数据超过了1w那么就分批查询
-        if allTotal > 100:
+        # 如果总数据超过了1w那么就分批查询
+        if allTotal > 10000:
             data = datetime.now().strftime("%Y-%m-%d")
             # 开始时间是当前日期的前2两个月并且开启时间是 16:00:00
             self.data['start_time'] = data + ' 16:00:00'
-            with tqdm(total=allTotal) as pbar:
+            with tqdm(total=allTotal+1) as pbar:
                 # 循环爬取，每次向前推60天
                 while allTotal != 0:
                     # 结束直接为上次的开始时间
@@ -89,7 +88,7 @@ class requestInit:
                         writeDataFile(data)
                         pbar.update(pageTotal)  # 更新进度条
                     allTotal -= data['meta']['pagination']['total']
-                    time.sleep(1)
+                    time.sleep(5)
         else:
             for _ in tqdm(range(0, allTotal, self.data['size'])):
                 writeDataFile(self.getSearchData(_))

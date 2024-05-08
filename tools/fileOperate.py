@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 
-fileName = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+fileName = datetime.now().strftime("%m月%d日%H点%M分%S秒")
 
 
 def readCookie():
@@ -27,16 +27,28 @@ def writeDataFile(data):
     :return:
     """
     for dataTemp in data['data']:
-        protocol = "https" if "ssl" in dataTemp['service']['name'] else "http"
+        if dataTemp['service']['name'] == "http/ssl":
+            protocol = "https"
+        elif dataTemp['service']['name'] == "http":
+            protocol = "http"
+        else:
+            protocol = dataTemp['service']['name']
         with open(f'./result/{fileName}.txt', 'a+', encoding='utf8') as f:
+            # f.write(dataTemp['ip']+'\n')
+
             if dataTemp.get('domain') is not None:
                 if dataTemp['domain'] == "":
                     f.write(f"{protocol}://{dataTemp['ip']}:{dataTemp['port']}\n")
                 else:
-                    f.write(f"{protocol}://{dataTemp['domain']}:{dataTemp['port']}\n")
+                    if dataTemp['port'] == 80 or dataTemp['port'] == 443:
+                        f.write(f"{protocol}://{dataTemp['domain']}\n")
+                    else:
+                        f.write(f"{protocol}://{dataTemp['domain']}:{dataTemp['port']}\n")
             else:
-                f.write(f"{protocol}://{dataTemp['ip']}:{dataTemp['port']}\n")
-
+                if dataTemp['port'] == 80 or dataTemp['port'] == 443:
+                    f.write(f"{protocol}://{dataTemp['ip']}\n")
+                else:
+                    f.write(f"{protocol}://{dataTemp['ip']}:{dataTemp['port']}\n")
 
 
 if __name__ == '__main__':

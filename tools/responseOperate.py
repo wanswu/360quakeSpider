@@ -17,4 +17,4 @@ def getStartDate(start_time_str):
 
 
 if __name__ == '__main__':
-    print('test')
+    print('test.py')
