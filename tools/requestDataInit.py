@@ -6,7 +6,9 @@ import time
 
 from .fileOperate import readCookie, writeDataFile
 from .responseOperate import getStartDate
+
 requests.packages.urllib3.disable_warnings()
+
 
 class requestInit:
     def __init__(self, searKey, size):
@@ -19,6 +21,7 @@ class requestInit:
             "latest": 'true',
             "ignore_cache": 'true',
             "shortcuts": [],
+            "query": searKey,
             "start": 0,
             "size": size,
             "device": {
@@ -49,7 +52,7 @@ class requestInit:
         :return: 返回数据总量
         """
         self.hearders['Cookie'] = readCookie()
-        resp = self.requests.post(url=self.api, headers=self.hearders, json=self.data,verify=False)
+        resp = self.requests.post(url=self.api, headers=self.hearders, json=self.data, verify=False)
         return resp.json()['meta']['pagination']['total']
 
     def getSearchData(self, start=0):
@@ -71,7 +74,7 @@ class requestInit:
             data = datetime.now().strftime("%Y-%m-%d")
             # 开始时间是当前日期的前2两个月并且开启时间是 16:00:00
             self.data['start_time'] = data + ' 16:00:00'
-            with tqdm(total=allTotal+1) as pbar:
+            with tqdm(total=allTotal + 1) as pbar:
                 # 循环爬取，每次向前推60天
                 while allTotal != 0:
                     # 结束直接为上次的开始时间
